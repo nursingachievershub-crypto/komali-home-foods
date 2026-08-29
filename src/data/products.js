@@ -201,7 +201,7 @@ export const products = [
     id: 12,
     name: 'Special Jumbo Vetapalem Pappu Cashewnut',
     category: 'dryfruits',
-    price: 649,
+    price: 650,
     originalPrice: 699,
     image: '/images/vetapalem_jumbo_cashew.png',
     description: 'Top-tier King Size W180 Grade Jumbo Cashew Nuts handpicked from Vetapalem, Andhra Pradesh. Extra-large, ultra-crisp, cream-colored whole cashews.',
