@@ -250,6 +250,24 @@ export const products = [
     isFeatured: true,
     spiceLevel: 'None',
     dietary: ['100% Rich Dry Fruits', 'Pure Cow Ghee', 'No Added Sugar']
+  },
+  {
+    id: 15,
+    name: 'Fried Cashewnut',
+    category: 'dryfruits',
+    price: 299,
+    originalPrice: 350,
+    image: '/images/fried_cashewnut.png',
+    description: 'Crispy, crunchy whole cashews slow-roasted in pure cow ghee and seasoned with authentic spicy Andhra masala and sea salt.',
+    ingredients: ['Whole Cashews', 'Pure Cow Ghee', 'Red Chili Masala', 'Black Pepper', 'Rock Salt'],
+    nutritionalInfo: { calories: 575, fat: '45g', carbs: '29g', protein: '17g' },
+    weight: '250g',
+    inStock: true,
+    rating: 4.9,
+    reviews: 94,
+    isFeatured: true,
+    spiceLevel: 'Medium',
+    dietary: ['100% Cashews', 'Ghee Roasted', 'No Preservatives']
   }
 ]
 
