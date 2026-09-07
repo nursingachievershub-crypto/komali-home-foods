@@ -1,10 +1,13 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from '../../context/CartContext'
 import { formatPrice } from '../../utils/formatPrice'
+import NotifyModal from '../common/NotifyModal'
 import './ProductCard.css'
 
 export default function ProductCard({ product }) {
   const { addToCart } = useCart()
+  const [showNotifyModal, setShowNotifyModal] = useState(false)
 
   const getSpiceBadge = (level) => {
     if (level === 'Hot') return <span className="badge badge-hot">🌶️ Hot</span>
@@ -14,7 +17,7 @@ export default function ProductCard({ product }) {
   }
 
   return (
-    <div className="product-card">
+    <div className={`product-card ${!product.inStock ? 'out-of-stock-card' : ''}`}>
       <Link to={`/products/${product.id}`} className="product-card-image-wrap">
         <img
           src={product.image}
@@ -22,7 +25,12 @@ export default function ProductCard({ product }) {
           className="product-card-image"
           loading="lazy"
         />
-        {product.originalPrice > product.price && (
+        {!product.inStock && (
+          <span className="product-card-out-stock-badge">
+            OUT OF STOCK
+          </span>
+        )}
+        {product.inStock && product.originalPrice > product.price && (
           <span className="product-card-discount">
             -{Math.round((1 - product.price / product.originalPrice) * 100)}%
           </span>
@@ -65,14 +73,30 @@ export default function ProductCard({ product }) {
             )}
           </div>
 
-          <button
-            className="btn btn-primary product-card-add-btn"
-            onClick={() => addToCart(product)}
-          >
-            + Add
-          </button>
+          {product.inStock ? (
+            <button
+              className="btn btn-primary product-card-add-btn"
+              onClick={() => addToCart(product)}
+            >
+              + Add
+            </button>
+          ) : (
+            <button
+              className="btn btn-outline product-card-notify-btn"
+              onClick={() => setShowNotifyModal(true)}
+            >
+              🔔 Notify Me
+            </button>
+          )}
         </div>
       </div>
+
+      {showNotifyModal && (
+        <NotifyModal
+          product={product}
+          onClose={() => setShowNotifyModal(false)}
+        />
+      )}
     </div>
   )
 }
