@@ -1,0 +1,447 @@
+.order-slip-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  overflow-y: auto;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.order-slip-modal {
+  background-color: #ffffff;
+  border-radius: 20px;
+  max-width: 780px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.order-slip-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background-color: #0f172a;
+  color: #ffffff;
+}
+
+.topbar-status {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.status-badge {
+  background-color: #10b981;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.35rem 0.85rem;
+  border-radius: 50px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ref-tag {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  font-family: monospace;
+  font-weight: 600;
+}
+
+.slip-close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #ffffff;
+  font-size: 1.2rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.slip-close-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Printable Paper Layout */
+.slip-paper {
+  padding: 2rem;
+  overflow-y: auto;
+  background-color: #ffffff;
+  color: #1e293b;
+  flex: 1;
+}
+
+.slip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.slip-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.slip-brand-title {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #b91c1c; /* Andhra Chili Red */
+  letter-spacing: 0.5px;
+}
+
+.slip-brand-tagline {
+  font-size: 0.88rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.slip-brand-address, .slip-brand-contact {
+  font-size: 0.8rem;
+  color: #475569;
+}
+
+.slip-badge-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+}
+
+.slip-type-tag {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  letter-spacing: 1px;
+}
+
+.slip-date {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.slip-divider {
+  height: 2px;
+  background: linear-gradient(90deg, #b91c1c 0%, #f59e0b 50%, #10b981 100%);
+  margin: 1.25rem 0;
+  border-radius: 2px;
+}
+
+.slip-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  background-color: #f8fafc;
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 1.25rem;
+}
+
+.slip-info-col h4 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.slip-info-col p {
+  font-size: 0.9rem;
+  color: #334155;
+  margin: 0.2rem 0;
+}
+
+.customer-name {
+  font-size: 1rem !important;
+  color: #0f172a !important;
+}
+
+/* Delivery Timeframe Banner */
+.delivery-timeframe-box {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border: 1.5px solid #a7f3d0;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.delivery-icon {
+  font-size: 2.2rem;
+}
+
+.delivery-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.delivery-badge-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #047857;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.delivery-timeframe-heading {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #065f46;
+  margin: 0.1rem 0;
+}
+
+.delivery-subtext {
+  font-size: 0.85rem;
+  color: #047857;
+  margin: 0;
+}
+
+/* Items Table */
+.slip-table-wrapper {
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+}
+
+.slip-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.slip-table th {
+  background-color: #f1f5f9;
+  color: #475569;
+  font-weight: 700;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid #cbd5e1;
+}
+
+.slip-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  color: #334155;
+}
+
+.slip-table tr:last-child td {
+  border-bottom: none;
+}
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+.item-name-cell {
+  color: #0f172a;
+}
+
+/* Financial Summary */
+.slip-financials {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  background-color: #f8fafc;
+  border-radius: 12px;
+  padding: 1.25rem;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 1.25rem;
+}
+
+.financial-note p {
+  margin: 0.3rem 0;
+  font-size: 0.88rem;
+  color: #475569;
+}
+
+.paid-status-tag {
+  background-color: #dcfce7;
+  color: #15803d;
+  font-weight: 800;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.financial-totals {
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.free-tag {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.grand-total-row {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  border-top: 2px dashed #cbd5e1;
+  padding-top: 0.5rem;
+  margin-top: 0.2rem;
+}
+
+.grand-price {
+  color: #b91c1c;
+}
+
+.slip-footer-note {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #64748b;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1rem;
+}
+
+.slip-ref-copy {
+  margin-top: 0.5rem;
+  cursor: pointer;
+  color: #2563eb;
+  display: inline-block;
+}
+
+.slip-ref-copy:hover {
+  text-decoration: underline;
+}
+
+/* Modal Actions Bar */
+.slip-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  background-color: #f1f5f9;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn-slip-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  text-align: center;
+}
+
+.customer-wa {
+  background-color: #25d366;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+}
+
+.customer-wa:hover {
+  background-color: #1eb956;
+  transform: translateY(-1px);
+}
+
+.admin-wa {
+  background-color: #075e54;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(7, 94, 84, 0.25);
+}
+
+.admin-wa:hover {
+  background-color: #054840;
+  transform: translateY(-1px);
+}
+
+.print-btn {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+.print-btn:hover {
+  background-color: #2563eb;
+}
+
+.close-modal-btn {
+  background-color: #64748b;
+  color: #ffffff;
+}
+
+.close-modal-btn:hover {
+  background-color: #475569;
+}
+
+/* Print CSS */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .printable-area, .printable-area * {
+    visibility: visible;
+  }
+  .printable-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    max-width: 100%;
+    box-shadow: none;
+    border: none;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .slip-paper {
+    padding: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .slip-info-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  .slip-actions {
+    grid-template-columns: 1fr;
+  }
+  .slip-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .slip-badge-box {
+    align-items: flex-start;
+  }
+}

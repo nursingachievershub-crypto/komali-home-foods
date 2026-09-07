@@ -3,6 +3,8 @@ import { useAuth } from '../../context/AuthContext'
 import { useCart } from '../../context/CartContext'
 import { useToast } from '../../context/ToastContext'
 import { formatPrice } from '../../utils/formatPrice'
+import { STORE_CONFIG, buildWhatsAppLink } from '../../utils/whatsapp'
+import OrderSlipModal from './OrderSlipModal'
 import './PaymentModal.css'
 
 export default function PaymentModal({ orderSummary, shippingAddress, onClose, onSuccess }) {
@@ -11,17 +13,18 @@ export default function PaymentModal({ orderSummary, shippingAddress, onClose, o
   const { addToast } = useToast()
 
   const [paymentMethod, setPaymentMethod] = useState('qr') // 'qr' | 'upi' | 'card'
-  const [step, setStep] = useState('details') // 'details' | 'verifying' | 'success'
+  const [step, setStep] = useState('details') // 'details' | 'verifying' | 'slip'
   const [utrNumber, setUtrNumber] = useState('')
   const [upiId, setUpiId] = useState('')
   const [cardData, setCardData] = useState({ number: '', expiry: '', cvc: '', name: '' })
   const [copied, setCopied] = useState(false)
   const [timeLeft, setTimeLeft] = useState(300) // 5 minutes timer
   const [verifyingProgress, setVerifyingProgress] = useState(0)
-  const [verifyingMessage, setVerifyingMessage] = useState('Initiating UPI Verification...')
+  const [verifyingMessage, setVerifyingMessage] = useState('Initiating Payment Verification...')
+  const [finalOrder, setFinalOrder] = useState(null)
 
-  const merchantUpi = 'komalihomefoods@icici'
-  const merchantName = 'Komali Home Foods'
+  const merchantUpi = STORE_CONFIG.merchantUpi
+  const merchantName = STORE_CONFIG.storeName
   const orderRefId = `KHF-${Math.floor(100000 + Math.random() * 900000)}`
 
   // Dynamic UPI URI string format compatible with all UPI apps
@@ -57,18 +60,13 @@ export default function PaymentModal({ orderSummary, shippingAddress, onClose, o
 
   const processSuccessfulOrder = (methodUsed) => {
     setStep('verifying')
-    setVerifyingProgress(25)
-    setVerifyingMessage('Connecting to NPCI / Bank Server...')
+    setVerifyingProgress(30)
+    setVerifyingMessage('Connecting to Bank Server...')
 
     setTimeout(() => {
-      setVerifyingProgress(60)
-      setVerifyingMessage('Verifying UPI Payment Transaction...')
-    }, 800)
-
-    setTimeout(() => {
-      setVerifyingProgress(90)
-      setVerifyingMessage('Payment Approved! Finalizing Order...')
-    }, 1600)
+      setVerifyingProgress(70)
+      setVerifyingMessage('Payment Received! Generating Order Slip...')
+    }, 600)
 
     setTimeout(() => {
       setVerifyingProgress(100)
@@ -77,27 +75,23 @@ export default function PaymentModal({ orderSummary, shippingAddress, onClose, o
         total: orderSummary.total,
         items: orderSummary.items,
         shippingAddress,
-        paymentMethod: `${methodUsed} (UTR: ${finalUtr})`,
+        paymentMethod: `${methodUsed} (Ref: ${finalUtr})`,
         orderRefId
       })
 
       clearCart()
-      addToast('Payment Received! Order Confirmed 🎉', 'success', 5000)
-      setStep('success')
+      addToast('Payment Confirmed! Order Slip Generated 🎉', 'success', 5000)
+      setFinalOrder(placedOrder)
+      setStep('slip')
       if (onSuccess) {
         onSuccess(placedOrder)
       }
-    }, 2400)
+    }, 1200)
   }
 
-  const handleConfirmQrPayment = (e) => {
-    e.preventDefault()
-    processSuccessfulOrder('UPI QR Code Scan')
-  }
-
-  const handleSimulatePayment = () => {
-    setUtrNumber(`3209${Math.floor(10000000 + Math.random() * 90000000)}`)
-    processSuccessfulOrder('Instant UPI QR Scan')
+  const handleConfirmPaid1Tap = (e) => {
+    if (e) e.preventDefault()
+    processSuccessfulOrder('UPI Instant Payment')
   }
 
   const handlePayUpiVpa = (e) => {
@@ -110,10 +104,24 @@ export default function PaymentModal({ orderSummary, shippingAddress, onClose, o
     processSuccessfulOrder('Credit / Debit Card')
   }
 
+  const waHelpUrl = buildWhatsAppLink(
+    `👋 Hello Komali Home Foods! I have a question regarding payment for my cart total ₹${orderSummary.total}. Please help me complete this order.`,
+    STORE_CONFIG.adminPhone
+  )
+
+  if (step === 'slip' && finalOrder) {
+    return (
+      <OrderSlipModal
+        order={finalOrder}
+        onClose={onClose}
+      />
+    )
+  }
+
   return (
     <div className="payment-overlay">
       <div className="payment-modal">
-        {step !== 'success' && (
+        {step !== 'verifying' && (
           <button className="payment-close-btn" onClick={onClose} aria-label="Close Payment Modal">
             ✕
           </button>
@@ -136,26 +144,20 @@ export default function PaymentModal({ orderSummary, shippingAddress, onClose, o
                 className={`payment-tab ${paymentMethod === 'qr' ? 'active' : ''}`}
                 onClick={() => setPaymentMethod('qr')}
               >
-                📷 Instant QR Code
+                📱 Pay via UPI / GPay / PhonePe
               </button>
               <button
-                className={`payment-tab ${paymentMethod === 'upi' ? 'active' : ''}`}
-                onClick={() => setPaymentMethod('upi')}
+                className={`payment-tab ${paymentMethod === 'cod' ? 'active' : ''}`}
+                onClick={() => setPaymentMethod('cod')}
               >
-                📱 UPI VPA / ID
-              </button>
-              <button
-                className={`payment-tab ${paymentMethod === 'card' ? 'active' : ''}`}
-                onClick={() => setPaymentMethod('card')}
-              >
-                💳 Debit/Credit Card
+                💵 Cash on Delivery (COD)
               </button>
             </div>
 
             {paymentMethod === 'qr' && (
               <div className="qr-payment-container">
                 <div className="qr-timer-banner">
-                  <span>⏱️ QR Code valid for: <strong>{formatTimer(timeLeft)}</strong></span>
+                  <span>⏱️ QR Code valid for: <strong>{formatTimer(timeLeft)}</strong> (Zero Gateway Fee)</span>
                   <span className="live-pulse-dot"></span>
                 </div>
 
@@ -168,14 +170,14 @@ export default function PaymentModal({ orderSummary, shippingAddress, onClose, o
                     />
                     <div className="qr-merchant-info">
                       <span className="merchant-name">🍛 {merchantName}</span>
-                      <span className="merchant-verified">✓ NPCI Verified Business</span>
+                      <span className="merchant-verified">✓ Direct UPI (0% Commission)</span>
                     </div>
                     <div className="qr-badge">Amount: {formatPrice(orderSummary.total)}</div>
                   </div>
                 </div>
 
                 <p className="qr-instruction">
-                  Scan QR with any app or tap app below to pay
+                  Scan QR with GPay/PhonePe/Paytm or tap app below to pay
                 </p>
 
                 <div className="upi-apps-row">
@@ -204,32 +206,86 @@ export default function PaymentModal({ orderSummary, shippingAddress, onClose, o
                 </div>
 
                 <div className="qr-action-box">
-                  <form onSubmit={handleConfirmQrPayment} className="qr-verify-form">
-                    <div className="payment-input-group">
-                      <label htmlFor="utrInput">
-                        12-Digit Bank UTR / Reference No. (Optional)
-                      </label>
-                      <input
-                        id="utrInput"
-                        type="text"
-                        placeholder="e.g. 320491823901"
-                        maxLength="12"
-                        value={utrNumber}
-                        onChange={(e) => setUtrNumber(e.target.value.replace(/\D/g, ''))}
-                      />
-                    </div>
+                  {/* 1-Tap Auto Confirm Button - ZERO Typing Required */}
+                  <button
+                    type="button"
+                    className="btn btn-primary payment-pay-btn seamless-confirm-btn"
+                    onClick={handleConfirmPaid1Tap}
+                  >
+                    ⚡ Paid! Confirm My Order & Get Receipt ➔
+                  </button>
 
-                    <button type="submit" className="btn btn-primary payment-pay-btn">
-                      I Have Scanned & Paid {formatPrice(orderSummary.total)} →
-                    </button>
-                  </form>
-
-                  <div className="qr-demo-simulator">
-                    <span className="demo-divider">OR FOR INSTANT DEMO</span>
-                    <button type="button" className="btn-demo-pay" onClick={handleSimulatePayment}>
-                      ⚡ Simulate Instant UPI Payment Received
-                    </button>
+                  <div className="qr-optional-utr">
+                    <label htmlFor="utrInput">
+                      Bank UTR / Ref No. (Optional):
+                    </label>
+                    <input
+                      id="utrInput"
+                      type="text"
+                      placeholder="Optional 12-digit UTR"
+                      maxLength="12"
+                      value={utrNumber}
+                      onChange={(e) => setUtrNumber(e.target.value.replace(/\D/g, ''))}
+                    />
                   </div>
+
+                  <div className="qr-help-row">
+                    <a
+                      href={waHelpUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-wa-help"
+                    >
+                      💬 Payment Issue / Failed? Chat on WhatsApp
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {paymentMethod === 'cod' && (
+              <div className="cod-payment-container">
+                <div className="cod-banner">
+                  <span className="cod-badge-tag">🎉 100% Free Payment Option</span>
+                  <h3>Pay Cash or Scan UPI on Delivery</h3>
+                  <p>No advance payment required. Pay safely when your food package arrives.</p>
+                </div>
+
+                <div className="cod-features-grid">
+                  <div className="cod-feature-card">
+                    <span className="cod-icon">🚚</span>
+                    <div className="cod-text">
+                      <strong>Zero Extra Fees</strong>
+                      <p>₹0 COD surcharge. Total payable is strictly {formatPrice(orderSummary.total)}</p>
+                    </div>
+                  </div>
+
+                  <div className="cod-feature-card">
+                    <span className="cod-icon">📲</span>
+                    <div className="cod-text">
+                      <strong>Flexible Payment on Arrival</strong>
+                      <p>Pay cash or scan courier agent's QR code on your doorstep</p>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="btn btn-primary payment-pay-btn cod-confirm-btn"
+                  onClick={() => processSuccessfulOrder('Cash on Delivery (COD - Pay on Arrival)')}
+                >
+                  📦 Place Cash on Delivery Order • {formatPrice(orderSummary.total)}
+                </button>
+
+                <div className="qr-help-row">
+                  <a
+                    href={waHelpUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-wa-help"
+                  >
+                    💬 Questions about COD? Chat with us on WhatsApp
+                  </a>
                 </div>
               </div>
             )}
@@ -249,7 +305,7 @@ export default function PaymentModal({ orderSummary, shippingAddress, onClose, o
                   <span className="input-hint">A payment request will be sent to your UPI app.</span>
                 </div>
                 <button type="submit" className="btn btn-primary payment-pay-btn">
-                  Send UPI Payment Request • {formatPrice(orderSummary.total)}
+                  Send UPI Request • {formatPrice(orderSummary.total)}
                 </button>
               </form>
             )}
@@ -310,20 +366,6 @@ export default function PaymentModal({ orderSummary, shippingAddress, onClose, o
               <div className="verifying-bar-fill" style={{ width: `${verifyingProgress}%` }}></div>
             </div>
             <p className="verifying-sub">Please do not refresh or close this browser window.</p>
-          </div>
-        )}
-
-        {step === 'success' && (
-          <div className="payment-success-state">
-            <div className="success-checkmark">✓</div>
-            <h2>Payment Successful & Order Confirmed!</h2>
-            <p className="success-ref">Order Reference: <strong>{orderRefId}</strong></p>
-            <p className="success-msg">
-              Thank you for ordering from <strong>Komali Home Foods</strong>. Your authentic items are being freshly prepared!
-            </p>
-            <button className="btn btn-primary" onClick={onClose}>
-              View My Order Summary 📦
-            </button>
           </div>
         )}
       </div>
