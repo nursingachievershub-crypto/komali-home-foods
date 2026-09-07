@@ -3,6 +3,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
 import { formatPrice } from '../utils/formatPrice'
+import {
+  STORE_CONFIG,
+  DELIVERY_DISTANCE_PRESETS,
+  calculateDeliveryFee,
+  buildAdminOrderMessage,
+  buildWhatsAppLink
+} from '../utils/whatsapp'
 import PaymentModal from '../components/checkout/PaymentModal'
 import './Checkout.css'
 
@@ -13,6 +20,7 @@ export default function Checkout() {
   
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [placedOrder, setPlacedOrder] = useState(null)
+  const [distanceKm, setDistanceKm] = useState(3)
 
   const [formData, setFormData] = useState({
     fullName: user ? user.name : '',
@@ -35,6 +43,10 @@ export default function Checkout() {
     }
   }, [user])
 
+  const deliveryFee = calculateDeliveryFee(distanceKm)
+  const grandTotal = cartTotal + deliveryFee
+  const distanceText = Number(distanceKm) <= 3 ? 'Within 3 km (Free)' : `${distanceKm} km (${distanceKm - 3} km extra × ₹10/km)`
+
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
@@ -42,6 +54,24 @@ export default function Checkout() {
 
   const handleOpenPayment = (e) => {
     e.preventDefault()
+    
+    // Create draft order data for WhatsApp payload
+    const draftOrder = {
+      orderRefId: `KHF-${Math.floor(100000 + Math.random() * 900000)}`,
+      items: cartItems,
+      subtotal: cartTotal,
+      deliveryFee,
+      distanceText,
+      total: grandTotal,
+      shippingAddress: formData,
+      paymentMethod: 'UPI / QR Code'
+    }
+
+    // Open WhatsApp to send order alert to Admin
+    const waUrl = buildWhatsAppLink(buildAdminOrderMessage(draftOrder), STORE_CONFIG.adminPhone)
+    window.open(waUrl, '_blank')
+
+    // Open Payment Modal
     setShowPaymentModal(true)
   }
 
@@ -147,7 +177,7 @@ export default function Checkout() {
                   value={formData.pincode}
                   onChange={handleChange}
                   required
-                  placeholder="500033"
+                  placeholder="500018"
                 />
               </div>
             </div>
@@ -192,8 +222,62 @@ export default function Checkout() {
               </div>
             </div>
 
+            {/* Delivery Distance Section */}
+            <div className="checkout-delivery-section">
+              <h2 className="checkout-section-title">🚚 Delivery Distance & Fare Calculation</h2>
+              <div className="delivery-rule-banner">
+                <span>📍 Dispatch Store: <strong>Sanath Nagar, Hyderabad (500018)</strong></span>
+                <p>• <strong>Within 3 km: FREE Delivery (₹0)</strong></p>
+                <p>• <strong>Beyond 3 km: ₹10 per km</strong> for extra distance</p>
+              </div>
+
+              <div className="distance-calculator-box">
+                <div className="form-group">
+                  <label htmlFor="presetSelect">Select Quick Distance Preset</label>
+                  <select
+                    id="presetSelect"
+                    value={distanceKm}
+                    onChange={(e) => setDistanceKm(Number(e.target.value))}
+                    className="distance-select"
+                  >
+                    {DELIVERY_DISTANCE_PRESETS.map(preset => (
+                      <option key={preset.km} value={preset.km}>
+                        {preset.label} — {preset.fee === 0 ? 'FREE Delivery 🎉' : `₹${preset.fee} Fee`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group custom-km-input-group">
+                  <label htmlFor="customKm">Or Enter Custom Distance (in km):</label>
+                  <div className="km-input-wrapper">
+                    <input
+                      type="number"
+                      id="customKm"
+                      min="1"
+                      max="100"
+                      value={distanceKm}
+                      onChange={(e) => setDistanceKm(Math.max(1, Number(e.target.value)))}
+                      className="km-input"
+                    />
+                    <span className="km-unit">km</span>
+                  </div>
+                </div>
+
+                <div className="km-fee-breakdown-badge">
+                  {Number(distanceKm) <= 3 ? (
+                    <span className="fee-free-text">🎉 {distanceKm} km is within 3 km range = <strong>FREE Delivery!</strong></span>
+                  ) : (
+                    <span className="fee-calc-text">
+                      📏 {distanceKm} km total = 3 km Free + {distanceKm - 3} km extra @ ₹10/km = <strong>₹{deliveryFee} Delivery Charge</strong>
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
             <button type="submit" className="btn btn-primary place-order-btn">
-              Proceed to Payment • {formatPrice(cartTotal)}
+              Proceed to Payment • {formatPrice(grandTotal)}
             </button>
           </form>
 
@@ -221,20 +305,32 @@ export default function Checkout() {
               <span>{formatPrice(cartTotal)}</span>
             </div>
             <div className="checkout-row">
-              <span>Standard Shipping</span>
-              <span className="checkout-free">FREE 🎉</span>
+              <span>Delivery Fee ({distanceKm} km)</span>
+              <span>
+                {deliveryFee === 0 ? (
+                  <strong className="checkout-free">FREE 🎉</strong>
+                ) : (
+                  <strong>{formatPrice(deliveryFee)}</strong>
+                )}
+              </span>
             </div>
             <div className="checkout-divider"></div>
             <div className="checkout-row checkout-total">
               <span>Total Payable</span>
-              <span>{formatPrice(cartTotal)}</span>
+              <span>{formatPrice(grandTotal)}</span>
             </div>
           </div>
         </div>
 
         {showPaymentModal && (
           <PaymentModal
-            orderSummary={{ total: cartTotal, items: cartItems }}
+            orderSummary={{
+              total: grandTotal,
+              subtotal: cartTotal,
+              deliveryFee,
+              distanceText: `${distanceKm} km`,
+              items: cartItems
+            }}
             shippingAddress={formData}
             onClose={() => setShowPaymentModal(false)}
             onSuccess={(order) => {

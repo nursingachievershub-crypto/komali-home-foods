@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { formatPrice } from '../utils/formatPrice'
+import { STORE_CONFIG, buildAdminOrderMessage, buildWhatsAppLink } from '../utils/whatsapp'
 import './Cart.css'
 
 export default function Cart() {
@@ -90,9 +91,12 @@ export default function Cart() {
               <span>{formatPrice(cartTotal)}</span>
             </div>
             <div className="summary-row">
-              <span>Shipping</span>
-              <span className="summary-free">Free</span>
+              <span>Delivery</span>
+              <span className="summary-free">FREE within 3 km *</span>
             </div>
+            <p className="cart-delivery-note">
+              * Delivery is FREE within 3 km of Sanath Nagar. Beyond 3 km: ₹10 per additional km.
+            </p>
             <div className="summary-divider"></div>
             <div className="summary-row summary-total">
               <span>Total</span>
@@ -102,6 +106,23 @@ export default function Cart() {
             <Link to="/checkout" className="btn btn-primary summary-checkout-btn">
               Proceed to Checkout
             </Link>
+
+            <button
+              type="button"
+              className="btn btn-whatsapp-order"
+              onClick={() => {
+                const draftOrder = {
+                  orderRefId: `KHF-${Math.floor(100000 + Math.random() * 900000)}`,
+                  items: cartItems,
+                  total: cartTotal,
+                  shippingAddress: { fullName: 'Customer', address: 'Details via WhatsApp' }
+                }
+                const waUrl = buildWhatsAppLink(buildAdminOrderMessage(draftOrder), STORE_CONFIG.adminPhone)
+                window.open(waUrl, '_blank')
+              }}
+            >
+              💬 Quick Order via WhatsApp
+            </button>
           </div>
         </div>
       </div>

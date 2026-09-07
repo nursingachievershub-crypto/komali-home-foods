@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom'
 import { products } from '../data/products'
 import { useCart } from '../context/CartContext'
 import { formatPrice } from '../utils/formatPrice'
+import { buildProductWhatsAppLink } from '../utils/whatsapp'
 import './ProductDetails.css'
 
 export default function ProductDetails() {
@@ -98,12 +99,23 @@ export default function ProductDetails() {
               </div>
             </div>
 
-            <button
-              className="btn btn-primary product-details-add-btn"
-              onClick={() => addToCart(product)}
-            >
-              🛒 Add to Cart - {formatPrice(product.price)}
-            </button>
+            <div className="product-details-actions">
+              <button
+                className="btn btn-primary product-details-add-btn"
+                onClick={() => addToCart(product)}
+              >
+                🛒 Add to Cart - {formatPrice(product.price)}
+              </button>
+
+              <a
+                href={buildProductWhatsAppLink(product)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-whatsapp-buy"
+              >
+                💬 Buy on WhatsApp
+              </a>
+            </div>
           </div>
         </div>
       </div>

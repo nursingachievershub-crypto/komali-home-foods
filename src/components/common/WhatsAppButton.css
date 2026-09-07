@@ -1,0 +1,231 @@
+.wa-float-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: inherit;
+}
+
+.wa-float-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.wa-float-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 12px 30px rgba(37, 211, 102, 0.5);
+}
+
+.wa-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.wa-tooltip {
+  position: absolute;
+  right: 70px;
+  background-color: #0f172a;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform: translateX(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.wa-float-btn:hover .wa-tooltip {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Popover Drawer */
+.wa-popover {
+  position: absolute;
+  bottom: 74px;
+  right: 0;
+  width: 320px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  animation: floatPop 0.25s ease-out;
+}
+
+.wa-popover-header {
+  background-color: #075e54;
+  color: #ffffff;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: relative;
+}
+
+.wa-avatar {
+  font-size: 1.6rem;
+  background: rgba(255, 255, 255, 0.15);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wa-header-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.wa-title {
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.wa-status {
+  font-size: 0.75rem;
+  color: #a7f3d0;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.wa-status-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #4ade80;
+  border-radius: 50%;
+}
+
+.wa-popover-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 1rem;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.wa-popover-close:hover {
+  opacity: 1;
+}
+
+.wa-popover-body {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  background-color: #f8fafc;
+}
+
+.wa-greeting {
+  font-size: 0.85rem;
+  color: #334155;
+  background: #ffffff;
+  padding: 0.75rem;
+  border-radius: 10px;
+  border-left: 3px solid #25d366;
+  margin: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.wa-quick-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.wa-option-btn {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #1e293b;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.wa-option-btn:hover {
+  background-color: #f0fdf4;
+  border-color: #86efac;
+  color: #15803d;
+}
+
+.wa-pincode-check {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.2rem;
+}
+
+.wa-pincode-check input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  outline: none;
+}
+
+.wa-pincode-check input:focus {
+  border-color: #25d366;
+}
+
+.wa-pincode-check button {
+  background-color: #075e54;
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.wa-pincode-check button:hover {
+  background-color: #054840;
+}
+
+@keyframes floatPop {
+  from { opacity: 0; transform: translateY(10px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 640px) {
+  .wa-float-container {
+    bottom: 16px;
+    right: 16px;
+  }
+  .wa-popover {
+    width: 290px;
+    right: -10px;
+  }
+  .wa-tooltip {
+    display: none;
+  }
+}
