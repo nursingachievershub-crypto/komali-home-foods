@@ -1,13 +1,16 @@
+import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { products } from '../data/products'
 import { useCart } from '../context/CartContext'
 import { formatPrice } from '../utils/formatPrice'
 import { buildProductWhatsAppLink } from '../utils/whatsapp'
+import NotifyModal from '../components/common/NotifyModal'
 import './ProductDetails.css'
 
 export default function ProductDetails() {
   const { id } = useParams()
   const { addToCart } = useCart()
+  const [showNotifyModal, setShowNotifyModal] = useState(false)
   const product = products.find(p => p.id === parseInt(id))
 
   if (!product) {
@@ -41,11 +44,22 @@ export default function ProductDetails() {
                 alt={product.name}
                 className="product-details-img"
               />
+              {!product.inStock && (
+                <span className="details-out-of-stock-banner">
+                  ⚠️ Currently Out of Stock
+                </span>
+              )}
             </div>
           </div>
 
           <div className="product-details-info">
-            <span className="product-details-category">{product.category}</span>
+            <div className="product-details-header-tags">
+              <span className="product-details-category">{product.category}</span>
+              {!product.inStock && (
+                <span className="out-of-stock-tag">Out of Stock</span>
+              )}
+            </div>
+
             <h1 className="product-details-name">{product.name}</h1>
             <p className="product-details-weight">{product.weight}</p>
 
@@ -100,25 +114,53 @@ export default function ProductDetails() {
             </div>
 
             <div className="product-details-actions">
-              <button
-                className="btn btn-primary product-details-add-btn"
-                onClick={() => addToCart(product)}
-              >
-                🛒 Add to Cart - {formatPrice(product.price)}
-              </button>
+              {product.inStock ? (
+                <>
+                  <button
+                    className="btn btn-primary product-details-add-btn"
+                    onClick={() => addToCart(product)}
+                  >
+                    🛒 Add to Cart - {formatPrice(product.price)}
+                  </button>
 
-              <a
-                href={buildProductWhatsAppLink(product)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-whatsapp-buy"
-              >
-                💬 Buy on WhatsApp
-              </a>
+                  <a
+                    href={buildProductWhatsAppLink(product)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-whatsapp-buy"
+                  >
+                    💬 Buy on WhatsApp
+                  </a>
+                </>
+              ) : (
+                <>
+                  <button
+                    className="btn btn-primary details-notify-btn"
+                    onClick={() => setShowNotifyModal(true)}
+                  >
+                    🔔 Notify Me When Back in Stock
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn-whatsapp-buy"
+                    onClick={() => setShowNotifyModal(true)}
+                  >
+                    💬 Request Restock on WhatsApp
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      {showNotifyModal && (
+        <NotifyModal
+          product={product}
+          onClose={() => setShowNotifyModal(false)}
+        />
+      )}
     </div>
   )
 }
